@@ -1,18 +1,21 @@
 # inverse modulo using extended Euclidean algorithm
 def inverseMod(d, n):
-    t, newt = 0, 1
-    r, newr = n, d
-    
-    while(newr != 0):
-        q = r // newr
-        r, newr = newr, (r % newr)
-        t, newt = newt, (t - q*newt)
-    if r > 1:
-        print("not in vertible")
+    if d < 0:
+        return inverseMod(n + d, n)
     else:
-        if (t < 0):
-            t += n
-        return int(t)
+        t, newt = 0, 1
+        r, newr = n, d
+
+        while(newr != 0):
+            q = r // newr
+            r, newr = newr, (r % newr)
+            t, newt = newt, (t - q*newt)
+        if r > 1:
+            print("not in vertible")
+        else:
+            if (t < 0):
+                t += n
+            return int(t)
 
 class Curve(object):
     def __init__(self, a, b, p, n, x_g, y_g):
