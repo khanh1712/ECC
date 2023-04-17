@@ -2,8 +2,10 @@ import field
 import Hash
 import secrets
 from tinyec import registry
+import time
 
-
+start = time.time()
+# Example key pair
 dA =b'81DB1EE100150FF2EA338D708271BE38300CB54241D79950F77B063039804F1D'
 
 x_qA =b'44106E913F92BC02A1705D9953A8414DB95E1AAA49E81D9E85F929A8E3100BE5'
@@ -17,10 +19,7 @@ y_qB =b'990C57520812BE512641E47034832106BC7D3E8DD0E4C7F1136D7006547CEC6A'
 x_Z =b'89AFC39D41D3B327814B80940B042590F96556EC91E6AE7939BCE31F3A18BF2B'
 y_Z =b'49C27868F4ECA2179BFD7D59B1E3BF34C1DBDE61AE12931648F43E59632504DE'
 
-priKey1 = int(dA, 16)
-priKey2 = int(dB, 16)
-
-
+# take parameters from a sample curve
 samplecurve = registry.get_curve("brainpoolP256r1")
 p = samplecurve.field.p
 a = samplecurve.a
@@ -29,8 +28,16 @@ x_g = samplecurve.g.x
 y_g = samplecurve.g.y
 n = samplecurve.field.n
 
+# Create curve from previous parameters
 curve = field.Curve(a, b, p, n, x_g, y_g)
+ 
+# example key pairs 
+priKey1 = int(dA, 16)
+priKey2 = int(dB, 16)
+pubKey1 = priKey1 * curve.g
+pubKey2 = priKey2 * curve.g
 
+# signature include r, s -> return a tuple (r,s)
 def ECC_sign(message, priKey): 
     h = Hash.bytes_to_long(Hash.hash_function(message))
     r = 0
@@ -48,7 +55,7 @@ def ECC_sign(message, priKey):
     f.close()
     return (r, s)
 
-
+# verify r, s -> return true or false
 def ECC_verify_sign(message, signature, pubKey):
     h = Hash.bytes_to_long(Hash.hash_function(message))
     u1 = field.inverseMod(signature[1], n) * h % n
@@ -60,7 +67,13 @@ def ECC_verify_sign(message, signature, pubKey):
         return True
     return False
 
+# example message and cert
+message = b'123456'
+cert = ECC_sign(message, priKey1)
+print(cert)
+print(ECC_verify_sign(message, cert, pubKey1))
 
-message = b'12345'
-print(ECC_sign(message, priKey1))
-print(ECC_verify_sign(message, ECC_sign(message, priKey2), priKey2 * curve.g))
+# measure runtime
+end = time.time()
+runtime = end - start
+print("Runtime: ", runtime)
